@@ -8,7 +8,8 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 fun Route.userRoutes(){
     route("/users") {
-        get("{id}"){
+        get(){
+            val user =  dao.addNewUser("sdad")
             call.respondText("Один пользователь")
         }
    }
