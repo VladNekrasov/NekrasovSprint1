@@ -1,5 +1,6 @@
 package org.nekrasov.dao
 
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.nekrasov.models.User
@@ -33,5 +34,12 @@ class DAOFacadeImpl : DAOFacade {
     }
     override suspend fun deleteUser(id: Int): Boolean = dbQuery {
         Users.deleteWhere { Users.id eq id } > 0
+    }
+}
+val dao: DAOFacade = DAOFacadeImpl().apply {
+    runBlocking {
+        if(allUsers().isEmpty()) {
+            addNewUser("Vlama")
+        }
     }
 }
