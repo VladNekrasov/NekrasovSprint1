@@ -9,18 +9,21 @@ import org.jetbrains.exposed.sql.transactions.experimental.*
 
 object DatabaseFactory {
     fun init(config: ApplicationConfig) {
-        val driverClassName = "org.postgresql.Driver"
-        //val jdbcURL = "jdbc:postgresql://chatpguser:1234@localhost:5432/chatdb"
-        //val jdbcURL = "jdbc:postgresql://localhost:5432/chatdb"
-        val jdbcURL = "jdbc:postgresql://postgres:5432/chatdb?user=chatpguser"
+        val driverClassName = config.property("storage.driverClassName").getString()
+        val jdbcURL = config.property("storage.jdbcURL").getString()
+        val user = config.property("storage.user").getString()
+        val password = config.property("storage.password").getString()
         val database = Database.connect(
-            url = "jdbc:postgresql://localhost:5432/chatdb",
-            driver = "org.postgresql.Driver",
-            user = "chatpguser",
-            password = "1234"
+            url = jdbcURL,
+            driver = driverClassName,
+            user = user,
+            password = password
         )
         transaction(database) {
             SchemaUtils.create(Users)
+            SchemaUtils.create(Chats)
+            SchemaUtils.create(Messages)
+            SchemaUtils.create(ChatSessions)
         }
     }
 

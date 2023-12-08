@@ -6,11 +6,17 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.nekrasov.models.User
 import org.nekrasov.models.Users
 import org.nekrasov.dao.DatabaseFactory.dbQuery
+import java.time.LocalDateTime
+import java.util.*
 
 class DAOFacadeImpl : DAOFacade {
     private fun resultRowToUser(row: ResultRow) = User(
         id = row[Users.id],
-        name = row[Users.name],
+        username = row[Users.username],
+        firstName = row[Users.firstName],
+        lastName = row[Users.lastName],
+        email = row[Users.email],
+        registrationDate = row[Users.registrationDate]
     )
     override suspend fun allUsers(): List<User> = dbQuery{
         Users.selectAll().map(::resultRowToUser)
@@ -21,15 +27,33 @@ class DAOFacadeImpl : DAOFacade {
             .map(::resultRowToUser)
             .singleOrNull()
     }
-    override suspend fun addNewUser(name: String): User? = dbQuery {
+    override suspend fun addNewUser(username:String,
+                                    firstName: String,
+                                    lastName: String,
+                                    email: String,
+                                    registrationDate: LocalDateTime
+    ): User? = dbQuery {
         val insertStatement = Users.insert {
-            it[Users.name] = name
+            it[Users.username] = username
+            it[Users.firstName] = firstName
+            it[Users.lastName] = lastName
+            it[Users.email] = email
+            it[Users.registrationDate] = registrationDate
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToUser)
     }
-    override suspend fun editUser(id: Int, name: String): Boolean = dbQuery {
+    override suspend fun editUser(id: Int,
+                                  username:String,
+                                  firstName: String,
+                                  lastName: String,
+                                  email: String,
+                                  registrationDate: LocalDateTime): Boolean = dbQuery {
         Users.update({Users.id eq id}){
-            it[Users.name] = name
+            it[Users.username] = username
+            it[Users.firstName] = firstName
+            it[Users.lastName] = lastName
+            it[Users.email] = email
+            it[Users.registrationDate] = registrationDate
         } > 0
     }
     override suspend fun deleteUser(id: Int): Boolean = dbQuery {
@@ -38,8 +62,5 @@ class DAOFacadeImpl : DAOFacade {
 }
 val dao: DAOFacade = DAOFacadeImpl().apply {
     runBlocking {
-        if(allUsers().isEmpty()) {
-            addNewUser("Vlama")
-        }
     }
 }
